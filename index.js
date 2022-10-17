@@ -1,12 +1,13 @@
 const { MongoClient } = require('mongodb');
 const assert = require('assert');
+const dbOperations = require('./operations');
 
 const url = 'mongodb://localhost:27017/';
 const dbname = 'conFusion';
 
 const client = new MongoClient(url);
 
-async function connect() {
+const connect = async () => {
 
     try {
         await client.connect();
@@ -18,9 +19,37 @@ async function connect() {
         console.log('After result:\n');
         console.log(insertionResult);
 
-        const findDishesResult = await collection.find({}).toArray();
-        console.log('After result:\n');
-        console.log(findDishesResult);
+        dbOperations.findDocuments(db, 'dishes')
+            .then((result) => {
+                console.log(result)
+                return dbOperations.insertDocument(db, { "name": "Biryani", "description": "Food, Rice" }, 'dishes');
+            })
+            .then((result) => {
+                console.log(result)
+                return dbOperations.findDocuments(db, 'dishes');
+            })
+            .then((result) => {
+                console.log(result)
+                return dbOperations.updateDocument(db, { name: "Biryani" }, { "name": "Daal", "description": "Food" }, 'dishes');
+            })
+            .then((result) => {
+                console.log(result)
+                return dbOperations.findDocuments(db, 'dishes');
+            })
+            .then((result) => {
+                console.log(result)
+            })
+            .catch((error) => {
+                console.log(error)
+            });
+
+        const result = await dbOperations.findDocuments(db, 'dishes');
+
+        // console.log(result);
+
+        // const findDishesResult = await collection.find({}).toArray();
+        // console.log('After result:\n');
+        // console.log(findDishesResult);
 
         await db.dropCollection('dishes');
         client.close();
